@@ -1,0 +1,8 @@
+.env
+.env1
+venv
+__pycache__
+plugins
+logs
+snowflake_data
+principal-iris-337317-18e16ba55e90.json
