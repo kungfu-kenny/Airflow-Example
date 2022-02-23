@@ -50,15 +50,25 @@ x-airflow-common:
     &airflow-common-env
 
     # See the .env example to this values
-    # USERS: your snowflake user
-    # PASSWORD: your password
-    # ACCOUNT: your account
-    # DATABASE: your database
-    # SCHEMA: your schema
+    CONNECTION_ID: snowflake_conn # your connection id
+    
+    # HOST: your snowflake host
+    # SCHEMA: your snowflake schema
+    # USERS: your snowflake login
+    # PASSWORD: your snowflake password
+    # ACCOUNT: your snowflake account
+    # DATABASE: your snowflake db
     # WAREHOUSE: your snowflake warehouse
-    # GCP_PROJECT_ID: id of the gcp
-    # GCP_TOPIC_ID: your gcp
-    # GOOGLE_JSON: /opt/path to google json
+    
+    GCP_PROJECT_ID: your project
+    GCP_TOPIC_ID: yor topic
+    
+    GOOGLE_JSON: /opt/ your json file
+
+    FOLDER_USED: /opt/snowflake_data
+    LIMIT: 10 #your limit of the seconds
+    
+    
 
     _AIRFLOW_WWW_USER_PASSWORD: airflow
     _AIRFLOW_WWW_USER_USERNAME: airflow
@@ -70,15 +80,16 @@ x-airflow-common:
     AIRFLOW__CORE__FERNET_KEY: ''
     AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'true'
     AIRFLOW__CORE__LOAD_EXAMPLES: 'true'
+    AIRFLOW__CORE__ENABLE_XCOM_PICKLING: 'true'
     AIRFLOW__API__AUTH_BACKEND: 'airflow.api.auth.backend.basic_auth'
-    _PIP_ADDITIONAL_REQUIREMENTS: ${_PIP_ADDITIONAL_REQUIREMENTS:- asn1crypto==1.4.0 cachetools==5.0.0 certifi==2021.10.8 cffi==1.15.0 charset-normalizer cryptography==36.0.1 google-api-core==2.5.0 google-auth==2.6.0 google-cloud==0.34.0 google-cloud-pubsub==2.9.0 googleapis-common-protos==1.54.0 grpc-google-iam-v1==0.12.3 grpcio==1.43.0 grpcio-status==1.43.0 idna==3.3 libcst==0.4.1 mypy-extensions==0.4.3 numpy oscrypto==1.2.1 pandas proto-plus==1.20.0 protobuf==3.19.4 pyasn1==0.4.8 pyasn1-modules==0.2.8 pycparser==2.21 pycryptodomex==3.13.0 PyJWT==2.3.0 pyOpenSSL==21.0.0 python-dateutil==2.8.2 python-dotenv==0.19.2 pytz==2021.3 PyYAML==6.0 requests==2.27.1 rsa==4.8 six==1.16.0 snowflake-connector-python==2.7.3 typing-extensions==4.0.1 typing-inspect==0.7.1 urllib3==1.26.8}
+    _PIP_ADDITIONAL_REQUIREMENTS: ${_PIP_ADDITIONAL_REQUIREMENTS:- apache-airflow-providers-snowflake asn1crypto cachetools certifi cffi charset-normalizer cryptography google-api-core google-auth google-cloud google-cloud-pubsub googleapis-common-protos grpc-google-iam-v1 grpcio grpcio-status idna libcst mypy-extensions numpy oscrypto pandas proto-plus protobuf pyasn1 pyasn1-modules pycparser pycryptodomex PyJWT pyOpenSSL python-dateutil python-dotenv pytz PyYAML requests rsa six snowflake-connector-python typing-extensions typing-inspect urllib3 google-ads==4.0.0 google-api-core==1.26.1 google-api-python-client==1.12.8 google-apitools==0.5.31 google-auth==1.28.0 google-auth-httplib2==0.1.0 google-auth-oauthlib==0.4.3 google-cloud-automl==2.2.0 google-cloud-bigquery==2.13.0 google-cloud-bigquery-datatransfer==3.1.0 google-cloud-bigquery-storage==2.1.0 google-cloud-bigtable==1.7.0 google-cloud-build==2.0.0 google-cloud-container==1.0.1 google-cloud-core==1.6.0 google-cloud-datacatalog==3.1.0 google-cloud-dataproc==2.3.0 google-cloud-datastore==1.15.3 google-cloud-dlp==1.0.0 google-cloud-kms==2.2.0 google-cloud-language==1.3.0 google-cloud-logging==2.2.0 google-cloud-memcache==0.3.0 google-cloud-monitoring==2.0.0 google-cloud-os-login==2.1.0 google-cloud-pubsub==2.7.1 google-cloud-pubsublite==0.3.0 google-cloud-redis==2.1.0 google-cloud-secret-manager==1.0.0 google-cloud-spanner==1.19.1 google-cloud-speech==1.3.2 google-cloud-storage==1.36.2 google-cloud-tasks==2.2.0 google-cloud-texttospeech==1.0.1 google-cloud-translate==1.7.0 google-cloud-videointelligence==1.16.1 google-cloud-vision==1.0.0 google-cloud-workflows==0.2.0 google-crc32c==1.1.2 google-pasta==0.2.0 google-resumable-media==1.2.0 googleapis-common-protos==1.53.0 graphviz==0.16 greenlet==1.0.0 grpc-google-iam-v1==0.12.3 grpcio==1.38.1 grpcio-gcp==0.2.2}
   volumes:
     - ./dags:/opt/airflow/dags
     - ./logs:/opt/airflow/logs
     - ./plugins:/opt/airflow/plugins
     # here is two volumes for the json of the selected google credentials and the json which uses the 
-    # - path to the google json:/opt/ google json
-    # - path to snowflake json:/opt/path to snowflake json
+    - ./your json file:/opt/your json file
+    - ./snowflake_data:/opt/snowflake_data
     
   user: "${AIRFLOW_UID:-50000}:0"
   depends_on:
@@ -245,8 +256,8 @@ services:
           echo "   https://airflow.apache.org/docs/apache-airflow/stable/start/docker.html#before-you-begin"
           echo
         fi
-        mkdir -p /sources/logs /sources/dags /sources/plugins
-        chown -R "${AIRFLOW_UID}:0" /sources/{logs,dags,plugins}
+        mkdir -p /sources/logs /sources/dags /sources/plugins /sources/snowflake_data
+        chown -R "${AIRFLOW_UID}:0" /sources/{logs,dags,plugins,snowflake_data}
         exec /entrypoint airflow version
     # yamllint enable rule:line-length
     environment:
