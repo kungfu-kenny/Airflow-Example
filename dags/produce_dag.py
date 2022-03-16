@@ -66,9 +66,9 @@ def get_datetime_used(ti):
     Function which is dedicate to use the
     """
     datetime_now = datetime.now()
-    value_min, value_max = ti.xcom_pull(task_ids=['snowflake_min', 'snowflake_max'])
-    value_min = value_min[0].get('MIN(INSTALL_DATE)')
-    value_max = value_max[0].get('MAX(INSTALL_DATE)')
+    value_new = ti.xcom_pull(task_ids=['snowflake_basic'])[0]
+    value_min = value_new[0].get('MIN(INSTALL_DATE)')
+    value_max = value_new[0].get('MAX(INSTALL_DATE)')
     
     value_min = value_min \
             if value_min and isinstance(value_min, datetime) else datetime_now   
@@ -137,20 +137,14 @@ def get_values_insert(ti):
     return value_result
 
 with DAG(
-    "produce_gan", 
+    "produce_dag", 
     start_date=datetime.now(), 
     schedule_interval=timedelta(minutes=4), 
     catchup=False) as dag:
 
-    snowflake_min = SnowflakeOperator(
-        task_id='snowflake_min',
-        sql="SELECT MIN(INSTALL_DATE) FROM TEST_EVENTS;",
-        snowflake_conn_id=os.getenv('CONNECTION_ID')
-    )
-
-    snowflake_max = SnowflakeOperator(
-        task_id='snowflake_max',
-        sql="SELECT MAX(INSTALL_DATE) FROM TEST_EVENTS;",
+    snowflake_basic = SnowflakeOperator(
+        task_id='snowflake_basic',
+        sql="SELECT MIN(INSTALL_DATE), MAX(INSTALL_DATE) FROM TEST_EVENTS;",
         snowflake_conn_id=os.getenv('CONNECTION_ID')
     )
 
@@ -169,4 +163,4 @@ with DAG(
         python_callable = _send_data_gcp
     )
 
-    snowflake_min >> snowflake_max >> datetime_json >> snowflake >> pub_sub
+    snowflake_basic >> datetime_json >> snowflake >> pub_sub

@@ -50,7 +50,7 @@ x-airflow-common:
     &airflow-common-env
 
     # See the .env example to this values
-    CONNECTION_ID: snowflake_conn # your connection id
+    CONNECTION_ID: your connection id
     
     # HOST: your snowflake host
     # SCHEMA: your snowflake schema
